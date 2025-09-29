@@ -1,0 +1,2643 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ChatGPT</title>
+    <link rel="icon" href="/gpt.ico">
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/7.0.0/css/all.min.css"
+        crossorigin="anonymous" referrerpolicy="no-referrer" />
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <style>
+        :root {
+            --color-scheme: dark;
+            --bg-color-main: #141414;
+            --bg-color-sidebar: #0D0D0D;
+            --bg-color-input: #212121;
+            --text-color-primary: #ECECEC;
+            --text-color-secondary: #A9A9A9;
+            --border-color-input: #555555;
+            --font-family: "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, "Noto Sans", sans-serif;
+        }
+
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        html,
+        body {
+            height: 100%;
+            font-family: var(--font-family);
+            background-color: var(--bg-color-sidebar);
+            color: var(--text-color-primary);
+        }
+
+        body {
+            display: flex;
+        }
+
+        a {
+            color: inherit;
+            text-decoration: none;
+        }
+
+        button {
+            background: none;
+            border: none;
+            cursor: pointer;
+            color: inherit;
+            font-family: inherit;
+        }
+
+        /* Custom Scrollbar */
+        html {
+            scrollbar-width: thin;
+            scrollbar-color: var(--border-color-input) var(--bg-color-main);
+        }
+
+        ::-webkit-scrollbar {
+            width: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--bg-color-main);
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background-color: var(--border-color-input);
+            border-radius: 10px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background-color: #777;
+        }
+
+        /* --- Sidebar --- */
+        .sidebar {
+            width: 260px;
+            background-color: var(--bg-color-sidebar);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            padding: 12px;
+            height: 100vh;
+            flex-shrink: 0;
+        }
+
+        .sidebar-top,
+        .sidebar-bottom {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .sidebar-top {
+            gap: 8px;
+        }
+
+        .sidebar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 4px;
+        }
+
+        .icon-button {
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s ease;
+        }
+
+        .icon-button:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+        }
+
+        .icon-button i {
+            font-size: 20px;
+            color: var(--text-color-secondary);
+        }
+
+        .openai-logo i {
+            font-size: 22px;
+            color: white;
+        }
+
+        .nav-link {
+            width: 100%;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            border-radius: 12px;
+            font-size: 0.9rem;
+            color: white;
+            text-align: left;
+        }
+
+        .nav-link:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .nav-link i {
+            width: 20px;
+            text-align: center;
+            font-size: 20px;
+            color: inherit;
+        }
+
+        .profile-dot {
+            width: 32px;
+            height: 32px;
+            background-color: #2a5d97;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: white;
+            /* Aligns with nav link padding */
+        }
+
+
+        /* --- Main Content --- */
+        .main-content {
+            flex-grow: 1;
+            background-color: var(--bg-color-main);
+            height: 100vh;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+            /* Prevents content from breaking flexbox layout */
+        }
+
+        .main-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 1.5rem;
+            height: 70px;
+            /* Fixed height for alignment */
+        }
+
+        .mobile-only {
+            display: none;
+        }
+
+        .title-dropdown {
+            font-size: 1.25rem;
+            font-weight: 500;
+            display: flex;
+            align-items: center;
+            gap: 4px;
+            cursor: pointer;
+            padding: 12px 12px;
+            border-radius: 8px;
+            transition: background-color 0.2s;
+        }
+
+        .title-dropdown:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .title-dropdown i {
+            font-size: 12px;
+            color: var(--text-color-secondary);
+        }
+
+        .header-right-icon i {
+            font-size: 24px;
+            color: var(--text-color-secondary);
+        }
+
+        .header-right-icon.active {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        .header-right-icon.active i {
+            color: var(--text-color-primary);
+        }
+
+        .chat-area {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding: 0 1.5rem;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .chat-area h1 {
+            font-size: 2rem;
+            margin-bottom: 1rem;
+            font-weight: 600;
+            color: var(--text-color-primary);
+        }
+
+        .chat-area p {
+            font-size: 1.125rem;
+            color: var(--text-color-secondary);
+            max-width: 600px;
+            line-height: 1.6;
+        }
+
+        .prompt-area {
+            width: 100%;
+            display: flex;
+            justify-content: center;
+        }
+
+        .prompt-input-wrapper {
+            width: 100%;
+            max-width: 720px;
+            display: flex;
+            align-items: flex-end;
+            gap: 8px;
+            background-color: var(--bg-color-input);
+            border-radius: 28px;
+            padding: 6px 6px 6px 16px;
+        }
+
+        .prompt-input-wrapper textarea {
+            flex-grow: 1;
+            background: transparent;
+            border: none;
+            outline: none;
+            color: var(--text-color-primary);
+            font-size: 1rem;
+            resize: none;
+            overflow-y: auto;
+            padding: 12px 0;
+            line-height: 1.6;
+            max-height: 200px;
+            font-family: var(--font-family);
+        }
+
+        :focus,
+        :focus-visible {
+            outline: none !important;
+            box-shadow: none !important;
+            border-color: inherit !important;
+            background-image: none !important;
+        }
+
+        input::-moz-focus-inner,
+        button::-moz-focus-inner {
+            border: 0;
+            padding: 0;
+        }
+
+        .prompt-input-wrapper textarea::placeholder {
+            color: var(--text-color-secondary);
+        }
+
+        .input-button {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            width: 44px;
+            height: 44px;
+        }
+
+        .input-button i {
+            font-size: 24px;
+            color: var(--text-color-secondary);
+        }
+
+        .input-button:hover {
+            background-color: rgba(255, 255, 255, 0.08);
+        }
+
+        /* --- Chat View --- */
+        #chat-messages {
+            max-width: 80%;
+            width: 100%;
+            margin: 0 auto;
+            padding: 2rem 0;
+            flex-grow: 1;
+        }
+
+        .welcome-screen {
+            flex-grow: 1;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            text-align: center;
+            padding-top: 15vh;
+        }
+
+        .welcome-screen.hidden {
+            display: none;
+        }
+
+        .welcome-screen .chat-footer {
+            display: none;
+        }
+
+        .prompt-area-container {
+            width: 100%;
+            padding: 1rem 1.5rem 1rem 1.5rem;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 8px;
+            background: var(--bg-color-main);
+            border-top: 1px solid transparent;
+            /* To prevent content from peeking */
+        }
+
+        #chat-form {
+            width: 100%;
+            max-width: 720px;
+        }
+
+        .send-button {
+            background-color: #333;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: background-color 0.2s;
+        }
+
+        .send-button.active {
+            background-color: var(--text-color-primary);
+        }
+
+        .send-button i {
+            font-size: 16px;
+            color: #777;
+            transition: color 0.2s;
+        }
+
+        .send-button.active i {
+            color: var(--bg-color-main);
+        }
+
+        .chat-footer {
+            font-size: 0.75rem;
+            color: var(--text-color-secondary);
+            text-align: center;
+        }
+
+        .user-prompt-wrapper {
+            display: flex;
+            justify-content: flex-end;
+            margin-bottom: 2rem;
+        }
+
+        .user-prompt {
+            padding: 8px 16px;
+            background-color: #232323;
+            border-radius: 32px;
+            color: var(--text-color-primary);
+            font-size: 1rem;
+            line-height: 1.6;
+            max-width: 75%;
+            white-space: pre-wrap;
+            word-break: break-word;
+        }
+
+        .ai-response-wrapper {
+            display: flex;
+            gap: 16px;
+            align-items: flex-start;
+        }
+
+        .ai-icon {
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            background-color: #000000;
+            /* OpenAI green */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            color: white;
+            font-size: 20px;
+        }
+
+        .ai-response-content {
+            font-size: 1rem;
+            line-height: 1.6;
+            color: var(--text-color-primary);
+            padding-top: 2px;
+            max-width: 75%;
+        }
+
+        .ai-response-content p {
+            color: inherit;
+            font-size: 1rem;
+            max-width: initial;
+        }
+
+        .ai-response-content p:last-child {
+            margin-bottom: 0;
+        }
+
+        .ai-response-actions {
+            margin-top: 12px;
+            display: flex;
+            gap: 8px;
+        }
+
+        .ai-response-actions button {
+            color: #9ca3af;
+            font-size: 16px;
+            padding: 4px;
+        }
+
+        .ai-response-actions button:hover {
+            color: var(--text-color-primary);
+        }
+
+        .ai-response-content pre {
+            background-color: #0D0D0D;
+            padding: 1rem;
+            border-radius: 12px;
+            overflow-x: auto;
+            font-family: 'Courier New', Courier, monospace;
+            white-space: pre-wrap;
+            word-wrap: break-word;
+        }
+
+        .ai-response-content code {
+            font-family: 'Courier New', Courier, monospace;
+            background-color: #333;
+            padding: 2px 4px;
+            border-radius: 4px;
+        }
+
+        .ai-response-content pre code {
+            background-color: transparent;
+            padding: 0;
+            border-radius: 0;
+        }
+
+        .ai-response-content ul,
+        .ai-response-content ol {
+            padding-left: 20px;
+            margin: 0.5rem 0;
+        }
+
+        .ai-response-content li {
+            margin-bottom: 0.25rem;
+        }
+
+        .ai-response-content hr {
+            margin-top: 20px;
+            margin-bottom: 20px;
+        }
+
+        .ai-response-content a {
+            color: #3f6fbd;
+            text-decoration: underline;
+        }
+
+        .ai-response-content p:not(:last-child) {
+            margin-bottom: 1rem;
+        }
+
+        /* --- Sidebar Scrolling & Chat History --- */
+        .sidebar-top {
+            flex-grow: 1;
+            overflow-y: auto;
+            padding-bottom: 8px;
+            /* Space from profile button */
+        }
+
+        .chat-history-list {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            padding: 0 4px;
+        }
+
+        .chat-history-header {
+            font-size: 0.8rem;
+            font-weight: 500;
+            color: var(--text-color-secondary);
+            padding: 16px 12px 8px;
+            display: block;
+        }
+
+        .chat-history-list a {
+            display: block;
+            padding: 10px 12px;
+            font-size: 0.9rem;
+            border-radius: 8px;
+            color: var(--text-color-primary);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            cursor: pointer;
+        }
+
+        .chat-history-list a:hover {
+            background-color: rgba(255, 255, 255, 0.05);
+        }
+
+        .chat-history-list a.active {
+            background-color: var(--bg-color-input);
+        }
+
+        /* --- Profile Dropdown --- */
+        #profile-menu {
+            position: absolute;
+            bottom: calc(100% + 8px);
+            /* Position above the profile button */
+            left: 0;
+            width: 100%;
+            background-color: var(--bg-color-input);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            padding: 8px;
+            z-index: 1010;
+        }
+
+        #profile-menu.hidden {
+            display: none;
+        }
+
+        .profile-menu-item {
+            width: 100%;
+            padding: 10px 12px;
+            text-align: left;
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        .profile-menu-item:hover {
+            background-color: rgba(255, 255, 255, 0.1);
+        }
+
+        #model-selector-menu {
+            position: absolute;
+            top: calc(100% + 8px);
+            /* Position below the title */
+            left: 0;
+            min-width: 220px;
+            background-color: var(--bg-color-input);
+            border-radius: 8px;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.5);
+            padding: 8px;
+            z-index: 1010;
+        }
+
+        #model-selector-menu.hidden {
+            display: none;
+        }
+
+        /* --- Auth Modal --- */
+        #auth-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .auth-container {
+            background-color: var(--bg-color-main);
+            padding: 2rem 3rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 400px;
+            color: var(--text-color-primary);
+        }
+
+        .auth-content h2 {
+            text-align: center;
+            margin-bottom: 1.5rem;
+            font-weight: 600;
+        }
+
+        .auth-content form {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .input-group label {
+            margin-bottom: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-color-secondary);
+        }
+
+        .input-group input {
+            background-color: var(--bg-color-input);
+            border: 1px solid var(--border-color-input);
+            color: var(--text-color-primary);
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-family: var(--font-family);
+            font-size: 1rem;
+        }
+
+        .input-group input:focus {
+            border-color: #8ab4f8;
+            outline: none;
+        }
+
+        .auth-content button[type="submit"] {
+            background-color: #2a5d97;
+            color: white;
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 500;
+            margin-top: 1rem;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        .auth-content button[type="submit"]:hover {
+            background-color: #3a7bc8;
+        }
+
+        .auth-switch {
+            text-align: center;
+            margin-top: 1.5rem;
+            color: var(--text-color-secondary);
+        }
+
+        .auth-switch a {
+            color: #8ab4f8;
+            font-weight: 500;
+            text-decoration: none;
+        }
+
+        .auth-switch a:hover {
+            text-decoration: underline;
+        }
+
+        .auth-error {
+            color: #f87171;
+            /* red-400 */
+            text-align: center;
+            min-height: 1.2em;
+            /* a placeholder so layout doesn't jump */
+            font-size: 0.9rem;
+        }
+
+        /* --- Custom Instructions Modal --- */
+        #instructions-modal,
+        #change-name-modal,
+        #delete-chats-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .instructions-container {
+            background-color: var(--bg-color-main);
+            padding: 2rem;
+            border-radius: 12px;
+            width: 100%;
+            max-width: 500px;
+            color: var(--text-color-primary);
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+
+        .instructions-container h2 {
+            font-weight: 600;
+            margin-bottom: 0.5rem;
+        }
+
+        .instructions-container p {
+            color: var(--text-color-secondary);
+            font-size: 0.9rem;
+            line-height: 1.5;
+        }
+
+        #instructions-input {
+            background-color: var(--bg-color-input);
+            border: 1px solid var(--border-color-input);
+            color: var(--text-color-primary);
+            padding: 0.75rem;
+            border-radius: 8px;
+            font-family: var(--font-family);
+            font-size: 1rem;
+            resize: vertical;
+            min-height: 150px;
+            height: 250px;
+        }
+
+        #instructions-input:focus {
+            border-color: #8ab4f8;
+            outline: none;
+        }
+
+        .instructions-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+
+        #char-counter {
+            font-size: 0.8rem;
+            color: var(--text-color-secondary);
+        }
+
+        .instructions-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .instructions-actions button {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: background-color 0.2s;
+        }
+
+        #cancel-instructions-btn,
+        #cancel-change-name-btn,
+        #cancel-delete-chats-btn {
+            background-color: var(--bg-color-input);
+        }
+
+        #cancel-instructions-btn:hover,
+        #cancel-change-name-btn:hover,
+        #cancel-delete-chats-btn:hover {
+            background-color: #444;
+        }
+
+        #save-instructions-btn,
+        #save-change-name-btn {
+            background-color: #2a5d97;
+            color: white;
+        }
+
+        #save-instructions-btn:hover,
+        #save-change-name-btn:hover {
+            background-color: #3a7bc8;
+        }
+
+        #confirm-delete-chats-btn {
+            background-color: #c93c37;
+            color: white;
+        }
+
+        #confirm-delete-chats-btn:hover {
+            background-color: #b22a2e;
+        }
+
+        /* --- Saved Memories Modal --- */
+        #memories-modal {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1000; display: none;
+            align-items: center; justify-content: center;
+        }
+        .memories-container {
+            background-color: var(--bg-color-main);
+            padding: 2rem; border-radius: 12px;
+            width: 100%; max-width: 600px; /* Wider for list */
+            color: var(--text-color-primary);
+            display: flex; flex-direction: column;
+            gap: 1rem;
+            max-height: 80vh;
+        }
+        .memories-container h2 { font-weight: 600; margin-bottom: 0.5rem; }
+        .memories-container p { color: var(--text-color-secondary); font-size: 0.9rem; line-height: 1.5; }
+
+        #memories-list {
+            flex-grow: 1;
+            overflow-y: auto;
+            background-color: var(--bg-color-input);
+            border: 1px solid var(--border-color-input);
+            border-radius: 8px;
+            padding: 8px;
+            display: flex; flex-direction: column; gap: 8px;
+            min-height: 150px;
+        }
+
+        .memory-item {
+            background-color: var(--bg-color-main);
+            padding: 12px;
+            border-radius: 6px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 0.9rem;
+            word-break: break-word;
+        }
+        
+        .memory-item-content {
+            flex-grow: 1;
+            margin-right: 12px;
+        }
+
+        .memory-item-delete-btn {
+            color: var(--text-color-secondary);
+            font-size: 16px;
+            flex-shrink: 0;
+        }
+        .memory-item-delete-btn:hover { color: #f87171; }
+        
+        #add-memory-form {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        #memory-input {
+            background-color: var(--bg-color-input);
+            border: 1px solid var(--border-color-input);
+            color: var(--text-color-primary);
+            padding: 0.75rem; border-radius: 8px;
+            font-family: var(--font-family); font-size: 1rem;
+            resize: vertical; min-height: 80px;
+        }
+        #memory-input:focus { border-color: #8ab4f8; outline: none; }
+        
+        .memory-input-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        #memory-char-counter { font-size: 0.8rem; color: var(--text-color-secondary); }
+        
+        #add-memory-btn {
+            padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.9rem; font-weight: 500;
+            background-color: #2a5d97; color: white;
+        }
+        #add-memory-btn:hover { background-color: #3a7bc8; }
+
+        .memories-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 1rem;
+        }
+        
+        #delete-all-memories-btn {
+            padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.9rem; font-weight: 500;
+            background-color: #c93c37; color: white;
+        }
+        #delete-all-memories-btn:hover { background-color: #b22a2e; }
+        
+        #close-memories-btn {
+            padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.9rem; font-weight: 500;
+            background-color: var(--bg-color-input);
+        }
+        #close-memories-btn:hover { background-color: #444; }
+
+        #delete-all-memories-modal {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background-color: rgba(0, 0, 0, 0.8);
+            z-index: 1010; /* Above memories modal */
+            display: none;
+            align-items: center; justify-content: center;
+        }
+        
+        #confirm-delete-all-memories-btn:hover {
+             background-color: #b22a2e !important;
+        }
+
+
+        /* --- Toggle Switch CSS --- */
+        .instructions-toggle-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 28px;
+        }
+
+        .switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: #555;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 4px;
+            bottom: 4px;
+            background-color: white;
+            -webkit-transition: .4s;
+            transition: .4s;
+        }
+
+        input:checked+.slider {
+            background-color: #2a5d97;
+        }
+
+        input:focus+.slider {
+            box-shadow: 0 0 1px #2a5d97;
+        }
+
+        input:checked+.slider:before {
+            -webkit-transform: translateX(22px);
+            -ms-transform: translateX(22px);
+            transform: translateX(22px);
+        }
+
+        .slider.round {
+            border-radius: 28px;
+        }
+
+        .slider.round:before {
+            border-radius: 50%;
+        }
+
+
+        /* --- Mobile Responsiveness --- */
+        @media (max-width: 768px) {
+            .sidebar {
+                display: none;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease-in-out;
+            }
+
+            .sidebar.mobile-open {
+                display: flex;
+                position: fixed;
+                top: 0;
+                left: 0;
+                z-index: 1000;
+                width: 260px;
+                height: 100vh;
+                transform: translateX(0);
+            }
+
+            .desktop-only {
+                display: none;
+            }
+
+            .mobile-only {
+                display: flex;
+            }
+
+            .mobile-close-btn {
+                display: flex !important;
+            }
+
+            .main-header {
+                justify-content: flex-start; /* Changed from space-between */
+                gap: 8px; /* Added spacing between items on left */
+                padding: 1rem;
+            }
+
+            .title-dropdown {
+                font-size: 1.1rem;
+            }
+
+            .header-menu-button i {
+                color: var(--text-color-secondary);
+            }
+
+            /* New rule to push the mobile new chat button to the right */
+            .mobile-new-chat-button {
+                margin-left: auto;
+            }
+
+            .chat-area {
+                padding: 1rem;
+            }
+
+            .chat-area h1 {
+                font-size: 2.25rem;
+            }
+
+            .chat-area p {
+                font-size: 1rem;
+            }
+
+            #chat-messages {
+                max-width: 95%;
+            }
+
+            .prompt-area {
+                padding: 0.5rem 1rem 1rem 1rem;
+            }
+
+            /* Mobile overlay for sidebar */
+            .mobile-overlay {
+                display: none;
+                position: fixed;
+                top: 0;
+                left: 0;
+                width: 100%;
+                height: 100%;
+                background-color: rgba(0, 0, 0, 0.5);
+                z-index: 999;
+            }
+
+            .mobile-overlay.active {
+                display: block;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <!-- Mobile overlay -->
+    <div class="mobile-overlay" id="mobile-overlay"></div>
+
+    <aside class="sidebar">
+        <div class="sidebar-top">
+            <div class="sidebar-header">
+                <button class="icon-button openai-logo" aria-label="OpenAI Menu">
+                    <i class="fa-brands fa-openai"></i>
+                </button>
+                <button class="icon-button mobile-only mobile-close-btn" aria-label="Close Menu" style="display: none;">
+                    <i class="fa-solid fa-xmark"></i>
+                </button>
+            </div>
+            <nav>
+                <button type="button" class="nav-link" id="new-chat-btn">
+                    <i class="fa-solid fa-pen-to-square"></i>
+                    <span>New chat</span>
+                </button>
+                <button type="button" class="nav-link">
+                    <i class="fa-solid fa-magnifying-glass"></i>
+                    <span>Search chats</span>
+                </button>
+                <button type="button" class="nav-link">
+                    <i class="fa-solid fa-images"></i>
+                    <span>Library</span>
+                </button>
+            </nav>
+            <div id="chat-history-container" class="chat-history-container" style="display: none;">
+                <span class="chat-history-header">Chats</span>
+                <div class="chat-history-list" id="chat-history-list">
+                    <!-- Chat history items will be injected here by JS -->
+                </div>
+            </div>
+        </div>
+        <div class="sidebar-bottom">
+            <div id="profile-container" style="position: relative;">
+                <button type="button" class="nav-link" id="profile-button">
+                    <div class="profile-dot" id="profile-initial">A</div>
+                    <span id="profile-name">Anonymous</span>
+                </button>
+                <div id="profile-menu" class="hidden">
+                    <button id="change-name-button" class="profile-menu-item">Change Name</button>
+                    <button id="delete-all-chats-button" class="profile-menu-item">Delete All Chats</button>
+                    <button id="saved-memories-button" class="profile-menu-item">Saved Memories</button>
+                    <button id="custom-instructions-button" class="profile-menu-item">Custom Instructions</button>
+                    <button id="signout-button" class="profile-menu-item">Sign Out</button>
+                </div>
+            </div>
+        </div>
+    </aside>
+
+    <main class="main-content">
+        <header class="main-header">
+            <!-- Mobile Hamburger -->
+            <button class="icon-button mobile-only header-menu-button" aria-label="Toggle Menu">
+                <i class="fa-solid fa-bars"></i>
+            </button>
+
+            <!-- Title -->
+            <div id="model-selector-container" style="position: relative;">
+                <div class="title-dropdown" id="model-selector-toggle">
+                    <span>ChatGPT <span id="model-name-display"
+                            style="color: var(--text-color-secondary);">4o</span></span>
+                    <i class="fa-solid fa-chevron-down"></i>
+                </div>
+                <div id="model-selector-menu" class="hidden">
+                    <button class="profile-menu-item model-select-btn" data-model="gpt-4o"
+                        data-display-name="4o">GPT-4o</button>
+                    <button class="profile-menu-item model-select-btn" data-model="gpt-4o-mini"
+                        data-display-name="4o-mini">GPT-4o mini</button>
+                </div>
+            </div>
+
+            <button id="temporary-chat-btn" class="icon-button desktop-only header-right-icon" aria-label="Temporary Chat">
+                <i class="fa-solid fa-comment"></i>
+            </button>
+
+            <!-- Mobile New Chat Icon -->
+            <button class="icon-button mobile-only mobile-new-chat-button" aria-label="New Chat">
+                <i class="fa-solid fa-pen-to-square"></i>
+            </button>
+        </header>
+
+        <div class="chat-area" id="chat-area">
+            <div class="welcome-screen" id="welcome-screen">
+                <div id="welcome-content-regular">
+                    <h1>What can I help with?</h1>
+                </div>
+                <div id="welcome-content-temporary" style="display: none;">
+                    <h1>Temporary Chat</h1>
+                    <p style="font-size: 0.9rem; color: var(--text-color-secondary); max-width: 450px; line-height: 1.6;">
+                        This chat won’t appear in history, use or update ChatGPT’s memory, or be used to train our models. For safety purposes, we may keep a copy of this chat for up to 30 days.
+                    </p>
+                </div>
+            </div>
+            <div id="chat-messages">
+                <!-- Messages will be injected here by JS -->
+            </div>
+        </div>
+
+        <div class="prompt-area-container">
+            <div class="prompt-area">
+                <form id="chat-form" class="prompt-input-wrapper">
+                    <input type="file" id="attachment-input" style="display: none;" />
+                    <button type="button" class="input-button plus-button" id="attachment-btn"
+                        aria-label="Add attachment"><i class="fa-solid fa-plus"></i></button>
+                    <textarea id="chat-input" placeholder="Ask anything" rows="1"></textarea>
+                    <button type="submit" id="send-btn" class="input-button send-button" aria-label="Send message">
+                        <i class="fa-solid fa-arrow-up"></i>
+                    </button>
+                </form>
+            </div>
+            <footer class="chat-footer">
+                ChatGPT can make mistakes. Check important info.
+            </footer>
+        </div>
+    </main>
+
+    <div id="auth-modal" style="display: none;">
+        <div class="auth-container">
+            <div class="auth-content">
+                <div id="signin-view">
+                    <h2>Sign In</h2>
+                    <form id="signin-form">
+                        <p class="auth-error" id="signin-error"></p>
+                        <div class="input-group">
+                            <label for="signin-email">Email</label>
+                            <input type="email" id="signin-email" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="signin-password">Password</label>
+                            <input type="password" id="signin-password" required>
+                        </div>
+                        <button type="submit">Sign In</button>
+                    </form>
+                    <p class="auth-switch">Don't have an account? <a href="#" id="show-signup">Sign Up</a></p>
+                </div>
+                <div id="signup-view" style="display: none;">
+                    <h2>Sign Up</h2>
+                    <form id="signup-form">
+                        <p class="auth-error" id="signup-error"></p>
+                        <div class="input-group">
+                            <label for="signup-name">Name</label>
+                            <input type="text" id="signup-name" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="signup-email">Email</label>
+                            <input type="email" id="signup-email" required>
+                        </div>
+                        <div class="input-group">
+                            <label for="signup-password">Password</label>
+                            <input type="password" id="signup-password" required>
+                        </div>
+                        <button type="submit">Sign Up</button>
+                    </form>
+                    <p class="auth-switch">Already have an account? <a href="#" id="show-signin">Sign In</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="instructions-modal" style="display: none;">
+        <div class="instructions-container">
+            <h2>Custom Instructions</h2>
+            <p>What would you like ChatGPT to know about you to provide better responses? This will be applied to all
+                new chats.</p>
+            <div class="instructions-toggle-container">
+                <span>Enable for new chats</span>
+                <label class="switch">
+                    <input type="checkbox" id="instructions-toggle">
+                    <span class="slider round"></span>
+                </label>
+            </div>
+            <textarea id="instructions-input" maxlength="1500" placeholder="Enter your instructions..."></textarea>
+            <div class="instructions-footer">
+                <span id="char-counter">0 / 1500</span>
+                <div class="instructions-actions">
+                    <button id="cancel-instructions-btn">Cancel</button>
+                    <button id="save-instructions-btn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="change-name-modal" style="display: none;">
+        <div class="instructions-container">
+            <h2>Change Name</h2>
+            <p>What would you like us to call you?</p>
+            <input id="new-name-input"
+                style="width: 100%; margin: 1rem 0; background-color: var(--bg-color-input); border: 1px solid var(--border-color-input); color: var(--text-color-primary); padding: 0.75rem; border-radius: 8px; font-family: var(--font-family); font-size: 1rem;">
+            <p class="auth-error" id="change-name-error" style="min-height: 1.2em; text-align: left;"></p>
+            <div class="instructions-footer">
+                <div class="instructions-actions" style="margin-left: auto;">
+                    <button id="cancel-change-name-btn">Cancel</button>
+                    <button id="save-change-name-btn">Save</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="delete-chats-modal" style="display: none;">
+        <div class="instructions-container">
+            <h2>Delete All Chats?</h2>
+            <p>Are you sure you want to delete all your chat history? This action cannot be undone.</p>
+            <p class="auth-error" id="delete-chats-error" style="min-height: 1.2em; text-align: left;"></p>
+            <div class="instructions-footer">
+                <div class="instructions-actions" style="margin-left: auto;">
+                    <button id="cancel-delete-chats-btn">Cancel</button>
+                    <button id="confirm-delete-chats-btn">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="memories-modal">
+        <div class="memories-container">
+            <h2>Saved Memories</h2>
+            <p>ChatGPT will remember these things across all chats. It may not use them if they aren't relevant to the conversation.</p>
+            
+            <div id="memories-list">
+                <!-- Memory items will be injected here by JS -->
+            </div>
+            
+            <form id="add-memory-form">
+                <textarea id="memory-input" maxlength="500" placeholder="Enter a new memory..."></textarea>
+                <div class="memory-input-footer">
+                    <span id="memory-char-counter">0 / 500</span>
+                    <button type="submit" id="add-memory-btn">Add Memory</button>
+                </div>
+                <p class="auth-error" id="memory-error" style="min-height: 1.2em; text-align: left;"></p>
+            </form>
+
+            <div class="memories-footer">
+                <button id="delete-all-memories-btn">Delete All</button>
+                <button id="close-memories-btn">Done</button>
+            </div>
+        </div>
+    </div>
+    
+    <div id="delete-all-memories-modal" style="display: none;">
+        <div class="instructions-container">
+            <h2>Delete All Memories?</h2>
+            <p>Are you sure you want to delete all your saved memories? This action cannot be undone.</p>
+            <div class="instructions-footer" style="justify-content: flex-end;">
+                <div class="instructions-actions">
+                    <button id="cancel-delete-all-memories-btn">Cancel</button>
+                    <button id="confirm-delete-all-memories-btn" style="background-color: #c93c37; color: white;">Delete</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const chatForm = document.getElementById('chat-form');
+            const chatInput = document.getElementById('chat-input');
+            const sendBtn = document.getElementById('send-btn');
+            const welcomeScreen = document.getElementById('welcome-screen');
+            const chatMessages = document.getElementById('chat-messages');
+            const newChatBtn = document.getElementById('new-chat-btn');
+            const chatArea = document.getElementById('chat-area');
+            const mainContent = document.querySelector('.main-content');
+            const promptAreaContainer = document.querySelector('.prompt-area-container');
+            const attachmentBtn = document.getElementById('attachment-btn');
+            const attachmentInput = document.getElementById('attachment-input');
+            const modelNameDisplay = document.getElementById('model-name-display');
+            const modelSelectorContainer = document.getElementById('model-selector-container');
+            const modelSelectorToggle = document.getElementById('model-selector-toggle');
+            const modelSelectorMenu = document.getElementById('model-selector-menu');
+            const chatHistoryContainer = document.getElementById('chat-history-container');
+            const chatHistoryList = document.getElementById('chat-history-list');
+
+            // --- State ---
+            let conversationHistory = [];
+            let currentChatId = null;
+            let currentChatUuid = null;
+            let currentModel = 'gpt-4o';
+            let userHasScrolledUp = false;
+            let isStreaming = false;
+            let isTemporaryChat = false;
+
+            // --- Auth elements ---
+            const authModal = document.getElementById('auth-modal');
+            const signinForm = document.getElementById('signin-form');
+            const signupForm = document.getElementById('signup-form');
+            const signinView = document.getElementById('signin-view');
+            const signupView = document.getElementById('signup-view');
+            const showSignupBtn = document.getElementById('show-signup');
+            const showSigninBtn = document.getElementById('show-signin');
+            const signinError = document.getElementById('signin-error');
+            const signupError = document.getElementById('signup-error');
+            const profileButton = document.getElementById('profile-button');
+            const profileInitial = document.getElementById('profile-initial');
+            const profileName = document.getElementById('profile-name');
+            const profileMenu = document.getElementById('profile-menu');
+            const signoutButton = document.getElementById('signout-button');
+
+            // --- Custom Instructions Elements ---
+            const customInstructionsButton = document.getElementById('custom-instructions-button');
+            const instructionsModal = document.getElementById('instructions-modal');
+            const instructionsInput = document.getElementById('instructions-input');
+            const instructionsToggle = document.getElementById('instructions-toggle');
+            const saveInstructionsBtn = document.getElementById('save-instructions-btn');
+            const cancelInstructionsBtn = document.getElementById('cancel-instructions-btn');
+            const charCounter = document.getElementById('char-counter');
+
+            // --- Change Name Elements ---
+            const changeNameButton = document.getElementById('change-name-button');
+            const changeNameModal = document.getElementById('change-name-modal');
+            const newNameInput = document.getElementById('new-name-input');
+            const saveChangeNameBtn = document.getElementById('save-change-name-btn');
+            const cancelChangeNameBtn = document.getElementById('cancel-change-name-btn');
+            const changeNameError = document.getElementById('change-name-error');
+
+            // --- Delete All Chats Elements ---
+            const deleteAllChatsButton = document.getElementById('delete-all-chats-button');
+            const deleteChatsModal = document.getElementById('delete-chats-modal');
+            const confirmDeleteChatsBtn = document.getElementById('confirm-delete-chats-btn');
+            const cancelDeleteChatsBtn = document.getElementById('cancel-delete-chats-btn');
+            const deleteChatsError = document.getElementById('delete-chats-error');
+
+            // --- Saved Memories Elements ---
+            const savedMemoriesButton = document.getElementById('saved-memories-button');
+            const memoriesModal = document.getElementById('memories-modal');
+            const memoriesList = document.getElementById('memories-list');
+            const addMemoryForm = document.getElementById('add-memory-form');
+            const memoryInput = document.getElementById('memory-input');
+            const memoryCharCounter = document.getElementById('memory-char-counter');
+            const addMemoryBtn = document.getElementById('add-memory-btn');
+            const memoryError = document.getElementById('memory-error');
+            const deleteAllMemoriesBtn = document.getElementById('delete-all-memories-btn');
+            const closeMemoriesBtn = document.getElementById('close-memories-btn');
+            const deleteAllMemoriesModal = document.getElementById('delete-all-memories-modal');
+            const cancelDeleteAllMemoriesBtn = document.getElementById('cancel-delete-all-memories-btn');
+            const confirmDeleteAllMemoriesBtn = document.getElementById('confirm-delete-all-memories-btn');
+
+            // --- Mobile Elements ---
+            const mobileMenuButton = document.querySelector('.header-menu-button');
+            const mobilePlusButton = document.querySelector('.mobile-only[aria-label="New Chat"]');
+            const sidebar = document.querySelector('.sidebar');
+            const mobileOverlay = document.getElementById('mobile-overlay');
+            const mobileCloseBtn = document.querySelector('.mobile-close-btn');
+            const temporaryChatBtn = document.getElementById('temporary-chat-btn');
+            const welcomeContentRegular = document.getElementById('welcome-content-regular');
+            const welcomeContentTemporary = document.getElementById('welcome-content-temporary');
+
+            chatArea.addEventListener('scroll', () => {
+                const threshold = 10; // A small buffer
+                // If the user has scrolled up and is not near the bottom
+                if (chatArea.scrollHeight - chatArea.scrollTop - chatArea.clientHeight > threshold) {
+                    userHasScrolledUp = true;
+                } else {
+                    // User has scrolled back to the bottom, re-enable auto-scroll
+                    userHasScrolledUp = false;
+                }
+            });
+
+            // Load model preference from local storage on startup
+            const savedModel = localStorage.getItem('chatgpt_model_preference');
+            const savedModelDisplayName = localStorage.getItem('chatgpt_model_display_name_preference');
+            if (savedModel && savedModelDisplayName) {
+                currentModel = savedModel;
+                modelNameDisplay.textContent = savedModelDisplayName;
+            }
+            // The default values in the HTML and in the `currentModel` variable will be used otherwise.
+
+            // --- Auth logic ---
+            const updateUserProfile = (user) => {
+                if (user && user.name) {
+                    profileName.textContent = user.name;
+                    profileInitial.textContent = user.name.charAt(0).toUpperCase();
+                } else {
+                    profileName.textContent = 'Anonymous';
+                    profileInitial.textContent = 'A';
+                }
+
+                const welcomeH1 = document.querySelector('#welcome-content-regular h1');
+                if (welcomeH1) {
+                    const welcomeMessages = [
+                        "Where should we begin?",
+                        "Good to see you, {NAME}.",
+                        "What's on the agenda today?",
+                        "How can I help, {NAME}?",
+                        "Ready when you are.",
+                        "What are you working on?",
+                        "Hey, {NAME}. Ready to dive in?"
+                    ];
+
+                    const userName = user && user.name ? user.name : null;
+                    
+                    let availableMessages = welcomeMessages;
+                    if (!userName) {
+                        availableMessages = welcomeMessages.filter(m => !m.includes('{NAME}'));
+                    }
+
+                    const randomIndex = Math.floor(Math.random() * availableMessages.length);
+                    let welcomeText = availableMessages[randomIndex];
+
+                    if (userName) {
+                        welcomeText = welcomeText.replace(/{NAME}/g, userName);
+                    }
+
+                    welcomeH1.textContent = welcomeText;
+                }
+            };
+
+            const checkAuthStatus = async () => {
+                try {
+                    const response = await fetch('/check_auth');
+                    if (response.ok) {
+                        const user = await response.json();
+                        authModal.style.display = 'none';
+                        updateUserProfile(user);
+                        fetchChatHistory(); // Fetch history on successful login
+                        setTimeout(() => chatInput.focus(), 0);
+                    } else {
+                        authModal.style.display = 'flex';
+                    }
+                } catch (error) {
+                    console.error('Auth check failed:', error);
+                    authModal.style.display = 'flex';
+                }
+            };
+
+            checkAuthStatus();
+
+            // Helper to programmatically open a chat by id (reuses existing click handler flow)
+            const openChatById = async (chatId) => {
+                // Find the link element if it exists and trigger its handler; otherwise call handleHistoryClick-like logic
+                const existingLink = Array.from(document.querySelectorAll('#chat-history-list a')).find(a => parseInt(a.dataset.chatId) === parseInt(chatId));
+                if (existingLink) {
+                    existingLink.click();
+                    return;
+                }
+
+                // If link not present (maybe history hasn't loaded yet), fetch messages directly
+                currentChatId = parseInt(chatId);
+                document.querySelectorAll('#chat-history-list a').forEach(a => a.classList.remove('active'));
+                // Try to set active on link if it arrives later (fetchChatHistory will re-render)
+                welcomeScreen.classList.add('hidden');
+                mainContent.appendChild(promptAreaContainer);
+                chatMessages.innerHTML = '<div>Loading chat...</div>';
+
+                try {
+                    const response = await fetch(`/api/chat/${chatId}`);
+                    if (!response.ok) throw new Error(`Failed to load chat: ${response.statusText}`);
+                    const messages = await response.json();
+                    conversationHistory = messages;
+                    chatMessages.innerHTML = '';
+                    messages.forEach(msg => {
+                        if (msg.role === 'user') renderUserMessage(msg.content);
+                        else if (msg.role === 'assistant') renderAssistantMessage(msg.content);
+                    });
+                    chatArea.scrollTop = chatArea.scrollHeight;
+                } catch (err) {
+                    console.error('Failed to open chat by id:', err);
+                    chatMessages.innerHTML = '<div>Error loading chat. Please try again.</div>';
+                }
+            };
+
+            const openChatByUuid = async (chatUuid) => {
+                // Try to find existing link and click
+                const existingLink = Array.from(document.querySelectorAll('#chat-history-list a')).find(a => a.dataset.chatUuid === chatUuid);
+                if (existingLink) {
+                    existingLink.click();
+                    return;
+                }
+
+                currentChatUuid = chatUuid;
+                currentChatId = null; // numeric id unknown until server responds
+                document.querySelectorAll('#chat-history-list a').forEach(a => a.classList.remove('active'));
+                welcomeScreen.classList.add('hidden');
+                mainContent.appendChild(promptAreaContainer);
+                chatMessages.innerHTML = '<div>Loading chat...</div>';
+
+                try {
+                    const response = await fetch(`/api/chat/uuid/${chatUuid}`);
+                    if (!response.ok) throw new Error(`Failed to load chat: ${response.statusText}`);
+                    const messages = await response.json();
+                    conversationHistory = messages;
+                    chatMessages.innerHTML = '';
+                    messages.forEach(msg => {
+                        if (msg.role === 'user') renderUserMessage(msg.content);
+                        else if (msg.role === 'assistant') renderAssistantMessage(msg.content);
+                    });
+                    chatArea.scrollTop = chatArea.scrollHeight;
+                } catch (err) {
+                    console.error('Failed to open chat by uuid:', err);
+                    chatMessages.innerHTML = '<div>Error loading chat. Please try again.</div>';
+                }
+            };
+
+            // If page loads with /chat/:id or /c/:uuid, try to open that chat after auth and history load
+            const processInitialUrl = () => {
+                try {
+                    // Support both legacy numeric /chat/:id and new /c/:uuid URLs
+                    const matchNumeric = window.location.pathname.match(/^\/chat\/(\d+)$/);
+                    const matchUuid = window.location.pathname.match(/^\/c\/(.+)$/);
+                    if (matchUuid) {
+                        const uuid = matchUuid[1];
+                        fetchChatHistory().then(() => openChatByUuid(uuid)).catch(() => openChatByUuid(uuid));
+                    } else if (matchNumeric) {
+                        const id = parseInt(matchNumeric[1]);
+                        // Ensure we have history loaded before opening; fetch history then open
+                        fetchChatHistory().then(() => openChatById(id)).catch(() => openChatById(id));
+                    } else {
+                        // No chat id in URL; ensure root state
+                        history.replaceState({}, '', '/');
+                    }
+                } catch (err) {
+                    console.warn('Error processing initial URL:', err);
+                }
+            };
+
+            // Handle back/forward navigation
+            window.addEventListener('popstate', (event) => {
+                try {
+                    const state = event.state;
+                    if (state && state.chatUuid) {
+                        openChatByUuid(state.chatUuid);
+                    } else if (state && state.chatId) {
+                        openChatById(state.chatId);
+                    } else {
+                        // No chat in state -> show welcome/new chat view
+                        chatMessages.innerHTML = '';
+                        welcomeScreen.classList.remove('hidden');
+                        welcomeScreen.appendChild(promptAreaContainer);
+                        conversationHistory = [];
+                        currentChatId = null;
+                        currentChatUuid = null;
+                        document.querySelectorAll('#chat-history-list a').forEach(a => a.classList.remove('active'));
+                    }
+                } catch (err) {
+                    console.warn('Error handling popstate:', err);
+                }
+            });
+
+            // Process the initial URL after a short delay to allow checkAuthStatus to complete
+            setTimeout(processInitialUrl, 200);
+
+            showSignupBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                signinView.style.display = 'none';
+                signupView.style.display = 'block';
+                signinError.textContent = '';
+            });
+
+            showSigninBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                signupView.style.display = 'none';
+                signinView.style.display = 'block';
+                signupError.textContent = '';
+            });
+
+            signupForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                signupError.textContent = '';
+                const name = document.getElementById('signup-name').value;
+                const email = document.getElementById('signup-email').value;
+                const password = document.getElementById('signup-password').value;
+
+                try {
+                    const response = await fetch('/signup', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ name, email, password }),
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        updateUserProfile(data.user);
+                        authModal.style.display = 'none';
+                        setTimeout(() => chatInput.focus(), 0);
+                    } else {
+                        signupError.textContent = data.message || 'Signup failed.';
+                    }
+                } catch (error) {
+                    signupError.textContent = 'An error occurred. Please try again.';
+                }
+            });
+
+            signinForm.addEventListener('submit', async (e) => {
+                e.preventDefault();
+                signinError.textContent = '';
+                const email = document.getElementById('signin-email').value;
+                const password = document.getElementById('signin-password').value;
+                try {
+                    const response = await fetch('/signin', {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password }),
+                    });
+                    const data = await response.json();
+                    if (response.ok) {
+                        updateUserProfile(data.user);
+                        fetchChatHistory(); // Fetch chat history on successful sign-in
+                        authModal.style.display = 'none';
+                        setTimeout(() => chatInput.focus(), 0);
+                    } else {
+                        signinError.textContent = data.message || 'Sign-in failed.';
+                    }
+                } catch (error) {
+                    signinError.textContent = 'An error occurred. Please try again.';
+                }
+            });
+
+            profileButton.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent this click from being caught by the window listener
+                if (modelSelectorMenu) modelSelectorMenu.classList.add('hidden');
+                profileMenu.classList.toggle('hidden');
+            });
+
+            signoutButton.addEventListener('click', async () => {
+                try {
+                    await fetch('/signout', { method: 'POST' });
+                    updateUserProfile(null);
+                    authModal.style.display = 'flex';
+                    profileMenu.classList.add('hidden'); // Hide menu after signing out
+                    // Clear chat area as well
+                    chatMessages.innerHTML = '';
+                    welcomeScreen.classList.remove('hidden');
+                    welcomeScreen.appendChild(promptAreaContainer);
+                    conversationHistory = [];
+                    currentChatId = null;
+                    renderChatHistory([]); // Clear history from sidebar
+                } catch (error) {
+                    console.error('Signout failed:', error);
+                }
+            });
+
+            // Close dropdowns if user clicks outside of them
+            window.addEventListener('click', (e) => {
+                if (!profileMenu.classList.contains('hidden') && !document.getElementById('profile-container').contains(e.target)) {
+                    profileMenu.classList.add('hidden');
+                }
+                if (modelSelectorMenu && !modelSelectorMenu.classList.contains('hidden') && !modelSelectorContainer.contains(e.target)) {
+                    modelSelectorMenu.classList.add('hidden');
+                }
+            });
+
+            // --- Model Selector Logic ---
+            if (modelSelectorToggle) {
+                modelSelectorToggle.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    profileMenu.classList.add('hidden');
+                    modelSelectorMenu.classList.toggle('hidden');
+                });
+
+                modelSelectorMenu.addEventListener('click', (e) => {
+                    const button = e.target.closest('.model-select-btn');
+                    if (button) {
+                        const model = button.dataset.model;
+                        const displayName = button.dataset.displayName;
+
+                        // Update state and UI
+                        currentModel = model;
+                        modelNameDisplay.textContent = displayName;
+
+                        // Save to local storage for persistence
+                        localStorage.setItem('chatgpt_model_preference', model);
+                        localStorage.setItem('chatgpt_model_display_name_preference', displayName);
+
+                        modelSelectorMenu.classList.add('hidden');
+                    }
+                });
+            }
+
+            const autoResizeTextarea = (textarea) => {
+                textarea.style.height = 'auto';
+                textarea.style.height = `${textarea.scrollHeight}px`;
+            };
+
+            // --- Chat History Logic ---
+            const renderUserMessage = (content) => {
+                const userMessageWrapper = document.createElement('div');
+                userMessageWrapper.className = 'user-prompt-wrapper';
+                const userMessage = document.createElement('div');
+                userMessage.className = 'user-prompt';
+                userMessage.textContent = content;
+                userMessageWrapper.appendChild(userMessage);
+                chatMessages.appendChild(userMessageWrapper);
+            };
+
+            const renderAssistantMessage = (content) => {
+                const aiResponseWrapper = document.createElement('div');
+                aiResponseWrapper.className = 'ai-response-wrapper';
+
+                const aiIcon = document.createElement('div');
+                aiIcon.className = 'ai-icon';
+                aiIcon.innerHTML = `<i class="fa-brands fa-openai"></i>`;
+
+                const aiResponseContent = document.createElement('div');
+                aiResponseContent.className = 'ai-response-content';
+
+                const messageContainer = document.createElement('div');
+                messageContainer.innerHTML = marked.parse(content);
+                aiResponseContent.appendChild(messageContainer);
+
+                const actions = document.createElement('div');
+                actions.className = 'ai-response-actions';
+                actions.innerHTML = `
+                    <button aria-label="Copy"><i class="fa-regular fa-clone"></i></button>
+                    <button aria-label="Good response"><i class="fa-regular fa-thumbs-up"></i></button>
+                    <button aria-label="Bad response"><i class="fa-regular fa-thumbs-down"></i></button>
+                    <button aria-label="Regenerate"><i class="fa-solid fa-arrows-rotate"></i></button>
+                `;
+                aiResponseContent.appendChild(actions);
+
+                aiResponseWrapper.appendChild(aiIcon);
+                aiResponseWrapper.appendChild(aiResponseContent);
+                chatMessages.appendChild(aiResponseWrapper);
+            };
+
+            const handleHistoryClick = async (e) => {
+                e.preventDefault();
+                const chatId = e.currentTarget.dataset.chatId ? parseInt(e.currentTarget.dataset.chatId) : null;
+                const chatUuid = e.currentTarget.dataset.chatUuid || null;
+                // If clicking the same chat, do nothing
+                if (chatUuid && chatUuid === currentChatUuid) return;
+                if (!chatUuid && chatId && chatId === currentChatId) return;
+
+                currentChatId = chatId;
+                currentChatUuid = chatUuid;
+
+                document.querySelectorAll('#chat-history-list a').forEach(a => a.classList.remove('active'));
+                e.currentTarget.classList.add('active');
+
+                welcomeScreen.classList.add('hidden');
+                mainContent.appendChild(promptAreaContainer);
+                chatMessages.innerHTML = '<div>Loading chat...</div>';
+
+                try {
+                    let response;
+                    if (chatUuid) {
+                        response = await fetch(`/api/chat/uuid/${chatUuid}`);
+                    } else {
+                        response = await fetch(`/api/chat/${chatId}`);
+                    }
+                    if (!response.ok) throw new Error(`Failed to load chat: ${response.statusText}`);
+
+                    const messages = await response.json();
+                    conversationHistory = messages;
+
+                    chatMessages.innerHTML = '';
+                    messages.forEach(msg => {
+                        if (msg.role === 'user') {
+                            renderUserMessage(msg.content);
+                        } else if (msg.role === 'assistant') {
+                            renderAssistantMessage(msg.content);
+                        }
+                    });
+                    chatArea.scrollTop = chatArea.scrollHeight;
+                    // Push state into the browser history so this chat has a unique URL
+                    try {
+                        const url = chatUuid ? `/c/${chatUuid}` : `/chat/${chatId}`;
+                        const state = chatUuid ? { chatUuid } : { chatId };
+                        if (window.location.pathname !== url) {
+                            history.pushState(state, '', url);
+                        }
+                    } catch (err) {
+                        console.warn('Failed to push history state:', err);
+                    }
+                } catch (error) {
+                    console.error(error);
+                    chatMessages.innerHTML = '<div>Error loading chat. Please try again.</div>';
+                }
+            };
+
+            const renderChatHistory = (history) => {
+                chatHistoryList.innerHTML = '';
+                if (history && history.length > 0) {
+                    chatHistoryContainer.style.display = 'block';
+                    history.forEach(chat => {
+                        const link = document.createElement('a');
+                        link.href = '#';
+                        link.textContent = chat.title;
+                        // Prefer UUID for building links; keep numeric id for compatibility
+                        if (chat.uuid) link.dataset.chatUuid = chat.uuid;
+                        link.dataset.chatId = chat.id;
+                        if ((chat.uuid && chat.uuid === currentChatUuid) || (chat.id === currentChatId)) {
+                            link.classList.add('active');
+                        }
+                        link.addEventListener('click', handleHistoryClick);
+                        chatHistoryList.appendChild(link);
+                    });
+                } else {
+                    chatHistoryContainer.style.display = 'none';
+                }
+            };
+
+            const fetchChatHistory = async () => {
+                try {
+                    const response = await fetch('/history');
+                    if (response.ok) {
+                        const history = await response.json();
+                        renderChatHistory(history);
+                    }
+                } catch (error) {
+                    console.error('Failed to fetch chat history:', error);
+                }
+            };
+
+            // Initially move prompt area to the welcome screen
+            welcomeScreen.appendChild(promptAreaContainer);
+
+            const handleSendMessage = async () => {
+                const messageText = chatInput.value.trim();
+                const attachmentFile = attachmentInput.files[0];
+
+                if (messageText === '' && !attachmentFile) return;
+                if (isStreaming) return;
+
+                isStreaming = true;
+                sendBtn.disabled = true;
+                sendBtn.innerHTML = '<i class="fa-solid fa-stop"></i>';
+
+                // When user sends a message, assume they want to see the response.
+                // Reset the scroll lock to re-enable auto-scrolling.
+                userHasScrolledUp = false;
+
+                if (welcomeScreen.classList.contains('hidden') === false) {
+                    welcomeScreen.classList.add('hidden');
+                    mainContent.appendChild(promptAreaContainer);
+                }
+
+                let userDisplayMessage = messageText;
+                if (attachmentFile) {
+                    userDisplayMessage += `\n[File Attached: ${attachmentFile.name}]`;
+                }
+                renderUserMessage(userDisplayMessage);
+
+                conversationHistory.push({ role: 'user', content: messageText });
+
+                const formData = new FormData();
+                formData.append('messages', JSON.stringify(conversationHistory));
+                
+                if (!isTemporaryChat) {
+                    if (currentChatUuid) formData.append('chat_uuid', currentChatUuid);
+                    else formData.append('chat_id', currentChatId);
+                }
+                
+                formData.append('model', currentModel);
+                formData.append('is_temporary', isTemporaryChat);
+                if (attachmentFile) {
+                    formData.append('attachment', attachmentFile);
+                }
+
+                chatInput.value = '';
+                attachmentInput.value = '';
+                sendBtn.classList.remove('active');
+                autoResizeTextarea(chatInput);
+                chatInput.focus();
+                chatArea.scrollTop = chatArea.scrollHeight;
+
+                const aiResponseWrapper = document.createElement('div');
+                aiResponseWrapper.className = 'ai-response-wrapper';
+                const aiIcon = document.createElement('div');
+                aiIcon.className = 'ai-icon';
+                aiIcon.innerHTML = `<i class="fa-brands fa-openai"></i>`;
+                const aiResponseContent = document.createElement('div');
+                aiResponseContent.className = 'ai-response-content';
+                const messageContainer = document.createElement('div');
+                messageContainer.textContent = '⬤';
+                aiResponseContent.appendChild(messageContainer);
+                aiResponseWrapper.appendChild(aiIcon);
+                aiResponseWrapper.appendChild(aiResponseContent);
+                chatMessages.appendChild(aiResponseWrapper);
+                chatArea.scrollTop = chatArea.scrollHeight;
+
+                let fullResponseText = '';
+                let isNewChat = currentChatId === null;
+
+                try {
+                    const response = await fetch('/chat', {
+                        method: 'POST',
+                        body: formData
+                    });
+
+                    if (!response.ok) {
+                        const errorText = await response.text();
+                        messageContainer.textContent = `Error: ${errorText || response.statusText}`;
+                        console.error('Server error:', errorText);
+                        conversationHistory.pop();
+                        return;
+                    }
+
+                    const reader = response.body.getReader();
+                    const decoder = new TextDecoder();
+                    let buffer = '';
+                    let metadataParsed = false;
+
+                    while (true) {
+                        const { value, done } = await reader.read();
+                        if (done) break;
+
+                        buffer += decoder.decode(value, { stream: true });
+
+                        if (!metadataParsed && isNewChat) {
+                            const lines = buffer.split('\n');
+                            // Look for new_chat_id, new_chat_uuid, chat_title lines in any order
+                            let newId = null;
+                            let newUuid = null;
+                            let titleLine = null;
+                            // Read up to first 5 lines in case order varies
+                            for (let i = 0; i < Math.min(lines.length, 5); i++) {
+                                const line = lines[i];
+                                if (!line) continue;
+                                if (line.startsWith('new_chat_id:')) newId = parseInt(line.split(':')[1]);
+                                else if (line.startsWith('new_chat_uuid:')) newUuid = line.split(':')[1];
+                                else if (line.startsWith('chat_title:')) titleLine = line.split(':').slice(1).join(':');
+                            }
+                            if (newId || newUuid) {
+                                if (newId) currentChatId = newId;
+                                if (newUuid) currentChatUuid = newUuid;
+                                fetchChatHistory(); // Refresh history list
+                                // Remove parsed metadata lines from buffer
+                                // Find index where metadata ends (first empty line) or skip first 5 lines
+                                buffer = lines.slice(5).join('\n');
+                                metadataParsed = true;
+                            }
+                        }
+
+                        if (!isNewChat || metadataParsed) {
+                            fullResponseText += buffer;
+                            // Only update the message container if we have actual content,
+                            // preserving the "⬤" until the first text chunk arrives.
+                            if (fullResponseText.trim() !== '') {
+                                messageContainer.innerHTML = marked.parse(fullResponseText);
+                            }
+                            buffer = '';
+                            if (!userHasScrolledUp) {
+                                chatArea.scrollTop = chatArea.scrollHeight;
+                            }
+                        }
+                    }
+                    if (buffer) { // Process any remaining buffer
+                        fullResponseText += buffer;
+                        if (fullResponseText.trim() !== '') {
+                            messageContainer.innerHTML = marked.parse(fullResponseText);
+                        }
+                    }
+
+                } catch (error) {
+                    messageContainer.textContent = 'An error occurred while connecting to the server.';
+                    console.error('Fetch error:', error);
+                    conversationHistory.pop();
+                } finally {
+                    isStreaming = false;
+                    sendBtn.disabled = false;
+                    sendBtn.innerHTML = '<i class="fa-solid fa-arrow-up"></i>';
+                    toggleSendButton();
+
+                    if (fullResponseText) {
+                        conversationHistory.push({ role: 'assistant', content: fullResponseText });
+                    }
+
+                    if (!isNewChat && fullResponseText) {
+                        fetchChatHistory(); // Refresh to move chat to top
+                    }
+
+                    const actions = document.createElement('div');
+                    actions.className = 'ai-response-actions';
+                    actions.innerHTML = `
+                        <button aria-label="Copy"><i class="fa-regular fa-clone"></i></button>
+                        <button aria-label="Good response"><i class="fa-regular fa-thumbs-up"></i></button>
+                        <button aria-label="Bad response"><i class="fa-regular fa-thumbs-down"></i></button>
+                        <button aria-label="Regenerate"><i class="fa-solid fa-arrows-rotate"></i></button>
+                    `;
+                    aiResponseContent.appendChild(actions);
+                    if (!userHasScrolledUp) {
+                        chatArea.scrollTop = chatArea.scrollHeight;
+                    }
+                }
+            };
+
+            chatForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                handleSendMessage();
+            });
+
+            attachmentBtn.addEventListener('click', () => {
+                attachmentInput.click();
+            });
+
+            const toggleSendButton = () => {
+                if (chatInput.value.trim() !== '' || attachmentInput.files.length > 0) {
+                    sendBtn.classList.add('active');
+                } else {
+                    sendBtn.classList.remove('active');
+                }
+            };
+
+            attachmentInput.addEventListener('change', toggleSendButton);
+            chatInput.addEventListener('input', () => {
+                toggleSendButton();
+                autoResizeTextarea(chatInput);
+            });
+
+            chatInput.addEventListener('keydown', (e) => {
+                if (e.key === 'Enter' && !e.shiftKey) {
+                    e.preventDefault();
+                    handleSendMessage();
+                }
+            });
+            newChatBtn.addEventListener('click', (e) => {
+                e.preventDefault();
+                chatMessages.innerHTML = '';
+                welcomeScreen.classList.remove('hidden');
+                welcomeScreen.appendChild(promptAreaContainer);
+                // Reset conversation history and state
+                conversationHistory = [];
+                currentChatId = null;
+                currentChatUuid = null;
+                document.querySelectorAll('#chat-history-list a').forEach(a => a.classList.remove('active'));
+                chatInput.focus();
+                
+                // Close mobile menu if open
+                if (isMobileMenuOpen) {
+                    closeMobileMenu();
+                }
+                // Clear URL (remove chat id) without creating a new history entry
+                try {
+                    const newUrl = '/';
+                    if (window.location.pathname !== newUrl) {
+                        history.replaceState({}, '', newUrl);
+                    }
+                } catch (err) {
+                    console.warn('Failed to clear URL on new chat:', err);
+                }
+            });
+            // Handle clicks on dynamically added action buttons via event delegation
+            chatMessages.addEventListener('click', (e) => {
+                const button = e.target.closest('button');
+                if (!button) return;
+
+                const actionsContainer = button.closest('.ai-response-actions');
+                if (!actionsContainer) return;
+
+                // --- Handle Copy Button ---
+                if (button.getAttribute('aria-label') === 'Copy') {
+                    const icon = button.querySelector('i');
+
+                    // Check for existing timer and clear it to handle spam clicks
+                    const existingTimeoutId = button.dataset.timeoutId;
+                    if (existingTimeoutId) {
+                        clearTimeout(parseInt(existingTimeoutId));
+                    }
+
+                    const aiResponseContent = button.closest('.ai-response-content');
+                    if (!aiResponseContent) return;
+
+                    // The message content is in the first child div of ai-response-content, before the actions div.
+                    const messageContainer = aiResponseContent.querySelector('div:first-of-type');
+                    if (!messageContainer) return;
+
+                    navigator.clipboard.writeText(messageContainer.textContent).then(() => {
+                        // Change icon to 'check'
+                        icon.classList.remove('fa-regular', 'fa-clone');
+                        icon.classList.add('fa-solid', 'fa-check');
+
+                        // Set timer to revert icon
+                        const timeoutId = setTimeout(() => {
+                            icon.classList.remove('fa-solid', 'fa-check');
+                            icon.classList.add('fa-regular', 'fa-clone');
+                            delete button.dataset.timeoutId; // Clean up
+                        }, 2000);
+
+                        // Store the timer ID on the button element
+                        button.dataset.timeoutId = timeoutId;
+                    }).catch(err => {
+                        console.error('Failed to copy text: ', err);
+                    });
+                    return; // Stop further processing for copy click
+                }
+
+                // --- Handle Thumbs Up/Down ---
+                const thumbUpBtn = actionsContainer.querySelector('button[aria-label="Good response"]');
+                const thumbDownBtn = actionsContainer.querySelector('button[aria-label="Bad response"]');
+
+                if (button !== thumbUpBtn && button !== thumbDownBtn) return;
+
+                const upIcon = thumbUpBtn.querySelector('i');
+                const downIcon = thumbDownBtn.querySelector('i');
+
+                const isThumbUpClick = (button === thumbUpBtn);
+                const clickedIcon = isThumbUpClick ? upIcon : downIcon;
+                const otherIcon = isThumbUpClick ? downIcon : upIcon;
+
+                // Toggle clicked icon
+                if (clickedIcon.classList.contains('fa-solid')) {
+                    // It was active, so just deactivate it (toggle off)
+                    clickedIcon.classList.replace('fa-solid', 'fa-regular');
+                } else {
+                    // It was inactive, so activate it and deactivate the other
+                    clickedIcon.classList.replace('fa-regular', 'fa-solid');
+                    otherIcon.classList.replace('fa-solid', 'fa-regular');
+                }
+            });
+
+            if (temporaryChatBtn) {
+                temporaryChatBtn.addEventListener('click', () => {
+                    isTemporaryChat = !isTemporaryChat;
+
+                    newChatBtn.click(); // Reset to new chat screen
+
+                    if (isTemporaryChat) {
+                        temporaryChatBtn.classList.add('active');
+                        welcomeContentRegular.style.display = 'none';
+                        welcomeContentTemporary.style.display = 'block';
+                    } else {
+                        temporaryChatBtn.classList.remove('active');
+                        welcomeContentRegular.style.display = 'block';
+                        welcomeContentTemporary.style.display = 'none';
+                        // After `newChatBtn.click()`, the welcome message might be the default.
+                        // A call to checkAuth to refresh the random welcome message could be placed here if desired,
+                        // but for now, it will revert to its initial state which is acceptable.
+                        checkAuthStatus();
+                    }
+                });
+            }
+
+            // --- Custom Instructions Logic ---
+            if (customInstructionsButton) {
+                customInstructionsButton.addEventListener('click', async () => {
+                    // Fetch current instructions
+                    try {
+                        const response = await fetch('/instructions');
+                        if (response.ok) {
+                            const data = await response.json();
+                            instructionsInput.value = data.instructions || '';
+                            instructionsToggle.checked = data.enabled;
+                            charCounter.textContent = `${instructionsInput.value.length} / 1500`;
+                        } else {
+                            console.error('Failed to load custom instructions.');
+                            instructionsInput.value = ''; // Clear on error
+                        }
+                    } catch (error) {
+                        console.error('Error fetching instructions:', error);
+                    }
+
+                    profileMenu.classList.add('hidden'); // Close profile menu
+                    instructionsModal.style.display = 'flex';
+                });
+
+                cancelInstructionsBtn.addEventListener('click', () => {
+                    instructionsModal.style.display = 'none';
+                });
+
+                // Close if clicking outside the container
+                instructionsModal.addEventListener('click', (e) => {
+                    if (e.target === instructionsModal) {
+                        instructionsModal.style.display = 'none';
+                    }
+                });
+
+                saveInstructionsBtn.addEventListener('click', async () => {
+                    const instructions = instructionsInput.value;
+                    const enabled = instructionsToggle.checked;
+                    try {
+                        const response = await fetch('/instructions', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ instructions: instructions, enabled: enabled }),
+                        });
+                        if (response.ok) {
+                            instructionsModal.style.display = 'none';
+                        } else {
+                            const errorData = await response.json();
+                            alert(`Error: ${errorData.message}`);
+                        }
+                    } catch (error) {
+                        console.error('Error saving instructions:', error);
+                        alert('An error occurred. Please try again.');
+                    }
+                });
+
+                instructionsInput.addEventListener('input', () => {
+                    charCounter.textContent = `${instructionsInput.value.length} / 1500`;
+                });
+            }
+
+            // --- Change Name Logic ---
+            if (changeNameButton) {
+                changeNameButton.addEventListener('click', () => {
+                    newNameInput.value = profileName.textContent; // Pre-fill with current name
+                    changeNameError.textContent = '';
+                    profileMenu.classList.add('hidden');
+                    changeNameModal.style.display = 'flex';
+                    newNameInput.focus();
+                });
+
+                cancelChangeNameBtn.addEventListener('click', () => {
+                    changeNameModal.style.display = 'none';
+                });
+
+                changeNameModal.addEventListener('click', (e) => {
+                    if (e.target === changeNameModal) {
+                        changeNameModal.style.display = 'none';
+                    }
+                });
+
+                saveChangeNameBtn.addEventListener('click', async () => {
+                    const newName = newNameInput.value.trim();
+                    if (!newName) {
+                        changeNameError.textContent = "Name cannot be empty.";
+                        return;
+                    }
+
+                    try {
+                        const response = await fetch('/change_name', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ name: newName }),
+                        });
+                        const data = await response.json();
+                        if (response.ok) {
+                            updateUserProfile({ name: newName }); // Optimistically update UI
+                            changeNameModal.style.display = 'none';
+                        } else {
+                            changeNameError.textContent = data.message || 'Failed to change name.';
+                        }
+                    } catch (error) {
+                        changeNameError.textContent = 'An error occurred. Please try again.';
+                    }
+                });
+            }
+
+            // --- Delete All Chats Logic ---
+            if (deleteAllChatsButton) {
+                deleteAllChatsButton.addEventListener('click', () => {
+                    deleteChatsError.textContent = '';
+                    profileMenu.classList.add('hidden');
+                    deleteChatsModal.style.display = 'flex';
+                });
+
+                cancelDeleteChatsBtn.addEventListener('click', () => {
+                    deleteChatsModal.style.display = 'none';
+                });
+
+                deleteChatsModal.addEventListener('click', (e) => {
+                    if (e.target === deleteChatsModal) {
+                        deleteChatsModal.style.display = 'none';
+                    }
+                });
+
+                confirmDeleteChatsBtn.addEventListener('click', async () => {
+                    try {
+                        const response = await fetch('/delete_all_chats', {
+                            method: 'POST'
+                        });
+                        if (response.ok) {
+                            // Clear chat area
+                            chatMessages.innerHTML = '';
+                            welcomeScreen.classList.remove('hidden');
+                            welcomeScreen.appendChild(promptAreaContainer);
+                            conversationHistory = [];
+                            currentChatId = null;
+                            renderChatHistory([]); // Clear history from sidebar
+                            deleteChatsModal.style.display = 'none';
+                        } else {
+                            const data = await response.json();
+                            deleteChatsError.textContent = data.message || 'Failed to delete chats.';
+                        }
+                    } catch (error) {
+                        deleteChatsError.textContent = 'An error occurred. Please try again.';
+                    }
+                });
+            }
+
+            // --- Saved Memories Logic ---
+            const renderMemories = (memories) => {
+                memoriesList.innerHTML = '';
+                if (memories.length === 0) {
+                    memoriesList.innerHTML = `<p style="text-align: center; color: var(--text-color-secondary); padding: 2rem 0;">No saved memories.</p>`;
+                } else {
+                    memories.forEach(mem => {
+                        const item = document.createElement('div');
+                        item.className = 'memory-item';
+                        item.dataset.memoryId = mem.id;
+                        // Basic XSS protection
+                        const sanitizedContent = mem.content.replace(/</g, "&lt;").replace(/>/g, "&gt;");
+                        item.innerHTML = `
+                            <div class="memory-item-content">${sanitizedContent}</div>
+                            <button class="memory-item-delete-btn" aria-label="Delete memory"><i class="fa-solid fa-trash"></i></button>
+                        `;
+                        memoriesList.appendChild(item);
+                    });
+                }
+            };
+
+            const fetchAndRenderMemories = async () => {
+                try {
+                    const response = await fetch('/memories');
+                    if (response.ok) {
+                        const memories = await response.json();
+                        renderMemories(memories);
+                    } else {
+                        memoryError.textContent = 'Failed to load memories.';
+                    }
+                } catch (error) {
+                    console.error('Error fetching memories:', error);
+                    memoryError.textContent = 'An error occurred while loading memories.';
+                }
+            };
+
+            if (savedMemoriesButton) {
+                savedMemoriesButton.addEventListener('click', () => {
+                    profileMenu.classList.add('hidden');
+                    memoryError.textContent = '';
+                    fetchAndRenderMemories();
+                    memoriesModal.style.display = 'flex';
+                });
+
+                closeMemoriesBtn.addEventListener('click', () => {
+                    memoriesModal.style.display = 'none';
+                });
+
+                memoriesModal.addEventListener('click', (e) => {
+                    if (e.target === memoriesModal) {
+                        memoriesModal.style.display = 'none';
+                    }
+                });
+                
+                memoryInput.addEventListener('input', () => {
+                    memoryCharCounter.textContent = `${memoryInput.value.length} / 500`;
+                });
+
+                addMemoryForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    memoryError.textContent = '';
+                    const content = memoryInput.value.trim();
+                    if (!content) return;
+
+                    try {
+                        const response = await fetch('/memories', {
+                            method: 'POST',
+                            headers: { 'Content-Type': 'application/json' },
+                            body: JSON.stringify({ content })
+                        });
+                        const data = await response.json();
+                        if (response.ok) {
+                            memoryInput.value = '';
+                            memoryInput.dispatchEvent(new Event('input')); // Update counter
+                            await fetchAndRenderMemories(); // Refresh list
+                        } else {
+                            memoryError.textContent = data.message || 'Failed to save memory.';
+                        }
+                    } catch (error) {
+                        console.error('Error saving memory:', error);
+                        memoryError.textContent = 'An error occurred. Please try again.';
+                    }
+                });
+
+                memoriesList.addEventListener('click', async (e) => {
+                    const deleteBtn = e.target.closest('.memory-item-delete-btn');
+                    if (!deleteBtn) return;
+                    
+                    const memoryItem = deleteBtn.closest('.memory-item');
+                    const memoryId = memoryItem.dataset.memoryId;
+
+                    try {
+                        const response = await fetch(`/memories/${memoryId}`, { method: 'DELETE' });
+                        if (response.ok) {
+                            memoryItem.remove(); // Optimistic update
+                            if (memoriesList.childElementCount === 0) {
+                               renderMemories([]);
+                            }
+                        } else {
+                            const data = await response.json();
+                            alert(`Error: ${data.message}`);
+                        }
+                    } catch (error) {
+                        console.error('Error deleting memory:', error);
+                        alert('An error occurred while deleting the memory.');
+                    }
+                });
+                
+                deleteAllMemoriesBtn.addEventListener('click', () => {
+                    deleteAllMemoriesModal.style.display = 'flex';
+                });
+                
+                cancelDeleteAllMemoriesBtn.addEventListener('click', () => {
+                    deleteAllMemoriesModal.style.display = 'none';
+                });
+
+                deleteAllMemoriesModal.addEventListener('click', (e) => {
+                    if (e.target === deleteAllMemoriesModal) {
+                        deleteAllMemoriesModal.style.display = 'none';
+                    }
+                });
+
+                confirmDeleteAllMemoriesBtn.addEventListener('click', async () => {
+                    try {
+                        const response = await fetch('/memories/all', { method: 'DELETE' });
+                        if (response.ok) {
+                            renderMemories([]);
+                            deleteAllMemoriesModal.style.display = 'none';
+                        } else {
+                            const data = await response.json();
+                            alert(`Error: ${data.message}`);
+                        }
+                    } catch (error) {
+                        console.error('Error deleting all memories:', error);
+                        alert('An error occurred.');
+                    }
+                });
+            }
+
+            // Global keyboard listener for shortcuts
+            document.addEventListener('keydown', async (e) => {
+                // CTRL+SHIFT+I to open custom instructions
+                if (e.ctrlKey && e.shiftKey && (e.key === 'I' || e.key === 'i')) {
+                    e.preventDefault();
+                    
+                    // Logic from customInstructionsButton click handler
+                    try {
+                        const response = await fetch('/instructions');
+                        if (response.ok) {
+                            const data = await response.json();
+                            instructionsInput.value = data.instructions || '';
+                            instructionsToggle.checked = data.enabled;
+                            charCounter.textContent = `${instructionsInput.value.length} / 1500`;
+                        } else {
+                            console.error('Failed to load custom instructions.');
+                            instructionsInput.value = ''; // Clear on error
+                        }
+                    } catch (error) {
+                        console.error('Error fetching instructions:', error);
+                    }
+
+                    profileMenu.classList.add('hidden'); // Close profile menu
+                    instructionsModal.style.display = 'flex';
+                }
+            });
+
+            // --- Mobile Functionality ---
+            let isMobileMenuOpen = false;
+
+            const openMobileMenu = () => {
+                isMobileMenuOpen = true;
+                sidebar.classList.add('mobile-open');
+                mobileOverlay.classList.add('active');
+            };
+
+            const closeMobileMenu = () => {
+                isMobileMenuOpen = false;
+                sidebar.classList.remove('mobile-open');
+                mobileOverlay.classList.remove('active');
+            };
+
+            // Mobile hamburger menu toggle
+            if (mobileMenuButton) {
+                mobileMenuButton.addEventListener('click', () => {
+                    if (isMobileMenuOpen) {
+                        closeMobileMenu();
+                    } else {
+                        openMobileMenu();
+                    }
+                });
+            }
+
+            // Mobile plus button for new chat
+            if (mobilePlusButton) {
+                mobilePlusButton.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    chatMessages.innerHTML = '';
+                    welcomeScreen.classList.remove('hidden');
+                    welcomeScreen.appendChild(promptAreaContainer);
+                    // Reset conversation history and state
+                    conversationHistory = [];
+                    currentChatId = null;
+                    document.querySelectorAll('#chat-history-list a').forEach(a => a.classList.remove('active'));
+                    chatInput.focus();
+                    
+                    // Close mobile menu if open
+                    if (isMobileMenuOpen) {
+                        closeMobileMenu();
+                    }
+                });
+            }
+
+            // Close mobile menu when clicking overlay
+            if (mobileOverlay) {
+                mobileOverlay.addEventListener('click', () => {
+                    if (isMobileMenuOpen) {
+                        closeMobileMenu();
+                    }
+                });
+            }
+
+            // Close mobile menu when clicking close button
+            if (mobileCloseBtn) {
+                mobileCloseBtn.addEventListener('click', () => {
+                    if (isMobileMenuOpen) {
+                        closeMobileMenu();
+                    }
+                });
+            }
+
+            // Close mobile menu when clicking on a chat history item
+            chatHistoryList.addEventListener('click', (e) => {
+                if (isMobileMenuOpen && e.target.tagName === 'A') {
+                    closeMobileMenu();
+                }
+            });
+
+            // Close mobile menu when clicking on profile menu items
+            document.addEventListener('click', (e) => {
+                if (isMobileMenuOpen && e.target.classList.contains('profile-menu-item')) {
+                    closeMobileMenu();
+                }
+            });
+
+            // Global keyboard listener to focus input when user starts typing
+            document.addEventListener('keydown', (e) => {
+                const activeEl = document.activeElement;
+                // Do nothing if user is already typing in an input, textarea, or button
+                const isInteractiveElementFocused = activeEl && (
+                    activeEl.tagName === 'INPUT' ||
+                    activeEl.tagName === 'TEXTAREA' ||
+                    activeEl.tagName === 'BUTTON' ||
+                    activeEl.isContentEditable
+                );
+
+                if (isInteractiveElementFocused) {
+                    return;
+                }
+
+                // Capture regular typing keys, but ignore modifiers, function keys, etc.
+                if (e.metaKey || e.ctrlKey || e.altKey || e.key.length > 1) {
+                    return;
+                }
+
+                // Prevent the default action for the key press (e.g., space scrolling the page)
+                e.preventDefault();
+
+                // Focus the input and transfer the typed character
+                chatInput.focus();
+                chatInput.value += e.key;
+
+                // Manually trigger the 'input' event to update UI (e.g., enable send button, resize textarea)
+                chatInput.dispatchEvent(new Event('input', { bubbles: true }));
+            });
+        });
+    </script>
+</body>
+
+</html>
